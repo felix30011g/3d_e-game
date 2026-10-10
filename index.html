@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Engine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="hud">
+        <div id="crosshair"></div>
+        <div id="info">
+            <div>Режим: <span id="mode">Игра</span></div>
+            <div>FPS: <span id="fps">0</span></div>
+            <div>Позиция: <span id="pos">0, 0, 0</span></div>
+        </div>
+        <div id="help">
+            <b>TAB</b> — переключить режим<br>
+            <span id="help-game">
+                <b>WASD</b> движение · <b>Shift</b> бег · <b>Space</b> прыжок · <b>Мышь</b> обзор
+            </span>
+            <span id="help-editor" style="display:none">
+                <b>ПКМ</b> вращение · <b>СКМ</b> панорама · <b>Колесо</b> зум<br>
+                <b>ЛКМ</b> выбрать · <b>Shift+ЛКМ</b> добавить к выделению · <b>Delete</b> удалить<br>
+                <b>G</b> перемещение · <b>R</b> вращение · <b>S</b> масштаб<br>
+                <b>1-6</b> примитив (ЛКМ по пустому месту — создать)<br>
+                <b>Ctrl+D</b> дублировать · <b>F</b> фокус на объект
+            </span>
+        </div>
+
+        <div id="palette">
+            <div class="slot" data-type="box">1<br>Куб</div>
+            <div class="slot" data-type="sphere">2<br>Сфера</div>
+            <div class="slot" data-type="cylinder">3<br>Цилиндр</div>
+            <div class="slot" data-type="cone">4<br>Конус</div>
+            <div class="slot" data-type="torus">5<br>Тор</div>
+            <div class="slot" data-type="plane">6<br>Плоскость</div>
+        </div>
+		<div id="snap-panel">
+			<label>
+				<input type="checkbox" id="snap-enabled">
+				<span>Snap к сетке</span>
+			</label>
+			<div class="snap-row">
+				<span>Шаг:</span>
+				<input type="number" id="snap-size" min="0.1" step="0.1" value="0.5">
+			</div>
+		</div>
+
+        <!-- Панель свойств (как в Unity Inspector) -->
+        <div id="inspector">
+            <div class="insp-header">
+                <span id="insp-title">Ничего не выбрано</span>
+                <button id="insp-close" title="Закрыть">×</button>
+            </div>
+            <div class="insp-body">
+                <div class="insp-section">Позиция (X, Y, Z)</div>
+                <div class="insp-row" data-prop="position">
+                    <input type="number" step="0.1" data-axis="x">
+                    <input type="number" step="0.1" data-axis="y">
+                    <input type="number" step="0.1" data-axis="z">
+                </div>
+
+                <div class="insp-section">Поворот (°)</div>
+                <div class="insp-row" data-prop="rotation">
+                    <input type="number" step="5" data-axis="x">
+                    <input type="number" step="5" data-axis="y">
+                    <input type="number" step="5" data-axis="z">
+                </div>
+
+                <div class="insp-section">Размер (X, Y, Z)</div>
+                <div class="insp-row" data-prop="scale">
+                    <input type="number" step="0.1" min="0.01" data-axis="x">
+                    <input type="number" step="0.1" min="0.01" data-axis="y">
+                    <input type="number" step="0.1" min="0.01" data-axis="z">
+                </div>
+
+                <div class="insp-section">Цвет</div>
+                <div class="insp-row">
+                    <input type="color" id="insp-color" style="width:100%;height:32px;border:none;background:none">
+                </div>
+
+                <div class="insp-section">Операции</div>
+                <div class="insp-row btns">
+                    <button id="insp-duplicate">Дублировать</button>
+                    <button id="insp-delete" class="danger">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+canvas { display: block; }
+
+#hud {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    font-family: -apple-system, "Segoe UI", monospace;
+    color: #fff;
+    user-select: none;
+    font-size: 13px;
+}
+
+#crosshair {
+    position: absolute; top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.15s;
+}
+#crosshair::before, #crosshair::after {
+    content: ''; position: absolute; background: #fff;
+    box-shadow: 0 0 3px #000;
+}
+#crosshair::before { left: 50%; top: 0; width: 2px; height: 100%; transform: translateX(-50%); }
+#crosshair::after  { top: 50%; left: 0; height: 2px; width: 100%; transform: translateY(-50%); }
+body.editor-mode #crosshair { opacity: 0; }
+
+#info {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(0,0,0,0.55);
+    padding: 8px 12px; border-radius: 6px; line-height: 1.5;
+}
+
+#help {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(0,0,0,0.55);
+    padding: 10px 14px; border-radius: 6px; line-height: 1.7;
+    max-width: 480px;
+}
+#help b { color: #ffd86b; }
+
+#palette {
+    position: absolute; top: 12px; right: 12px;
+    display: flex; gap: 6px;
+    pointer-events: auto;
+}
+
+#snap-panel {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(20, 22, 28, 0.92);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    pointer-events: auto;
+    color: #fff;
+    font-size: 12px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 170px;
+    backdrop-filter: blur(8px);
+}
+body.editor-mode #snap-panel { display: flex; }
+
+/* Палитра теперь ниже snap-панели */
+body.editor-mode #palette { top: 108px; }
+
+#snap-panel label {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
+}
+#snap-panel input[type="checkbox"] {
+    accent-color: #ffd86b;
+    width: 14px; height: 14px;
+}
+.snap-row {
+    display: flex; align-items: center; gap: 8px;
+}
+.snap-row span { color: #8a8f98; }
+#snap-size {
+    flex: 1; min-width: 0;
+    background: #0e1014;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-family: inherit;
+    outline: none;
+}
+#snap-size:focus { border-color: #ffd86b; }
+
+body:not(.editor-mode) #palette { display: none; }
+.slot {
+    width: 60px; height: 56px;
+    background: rgba(0,0,0,0.55);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    font-size: 11px; line-height: 1.2;
+    cursor: pointer; transition: all 0.15s;
+    color: #ccc;
+}
+.slot:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.slot.active { border-color: #ffd86b; background: rgba(255,216,107,0.15); color: #ffd86b; }
+
+/* === Панель свойств (Inspector) === */
+#inspector {
+    position: absolute;
+    top: 80px; right: 12px;
+    width: 260px;
+    background: rgba(20, 22, 28, 0.92);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    pointer-events: auto;
+    backdrop-filter: blur(8px);
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+body.editor-mode #inspector { display: flex; }
+
+.insp-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; color: #ffd86b;
+    font-size: 13px;
+}
+#insp-close {
+    background: none; border: none; color: #888; font-size: 18px;
+    cursor: pointer; padding: 0 4px; line-height: 1;
+}
+#insp-close:hover { color: #fff; }
+
+.insp-body { padding: 10px 12px 12px; }
+.insp-body.disabled { opacity: 0.35; pointer-events: none; }
+
+.insp-section {
+    font-size: 11px; color: #8a8f98;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin: 10px 0 4px;
+}
+.insp-section:first-child { margin-top: 0; }
+
+.insp-row {
+    display: flex; gap: 4px;
+}
+.insp-row input[type="number"] {
+    flex: 1; min-width: 0;
+    background: #0e1014;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    padding: 5px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+}
+.insp-row input[type="number"]:focus {
+    border-color: #ffd86b;
+    background: #15181e;
+}
+.insp-row input[type="number"]::-webkit-outer-spin-button,
+.insp-row input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+}
+
+.insp-row.btns button {
+    flex: 1;
+    padding: 6px;
+    background: #2a2e38;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+}
+.insp-row.btns button:hover { background: #353a46; }
+.insp-row.btns button.danger:hover { background: #8b2a2a; border-color: #c44; }
+
+/* Цветовые метки для осей (как в Unity) */
+.insp-row[data-prop="position"] input[data-axis="x"] { color: #ff6b6b; }
+.insp-row[data-prop="position"] input[data-axis="y"] { color: #8ee66b; }
+.insp-row[data-prop="position"] input[data-axis="z"] { color: #6ba6ff; }
