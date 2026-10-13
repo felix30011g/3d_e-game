@@ -2,38 +2,38 @@ import * as THREE from 'three';
 import { World } from './world.js';
 import { Player } from './player.js';
 import { Editor } from './editor.js';
-window.THREE = THREE
+import { Lighting } from './lighting.js';
 
 class Game {
     constructor() {
-        // ВАЖНО: renderer первым — иначе renderer.domElement не существует
         this._initRenderer();
         this._initScene();
 
-        // Проверка, что canvas реально создан
-        if (!this.renderer.domElement) {
-            throw new Error('renderer.domElement не создан — проверь _initRenderer');
-        }
+        this.world    = new World(this.scene);
+        this.lighting = new Lighting(this.scene);
+        this.player   = new Player(this.camera, this.renderer.domElement, this.world);
 
-        this.world  = new World(this.scene);
-        this.player = new Player(this.camera, this.renderer.domElement, this.world);
-
-        // Передаём domElement в Editor явно
         this.editor = new Editor(
             this.scene,
             this.camera,
             this.player,
             this.world,
+            this.lighting,
+            this.renderer,
             this.renderer.domElement
         );
 
         this.player.editor = this.editor;
+
+        // Настройки графики из localStorage
+        this.editor.loadGraphicsSettings();
 
         this.clock = new THREE.Clock();
         this.fpsAcc = 0;
         this.fpsFrames = 0;
 
         this._addStarterObjects();
+
         window.addEventListener('resize', () => this._onResize());
         this._loop();
     }
@@ -46,13 +46,14 @@ class Game {
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.0;
-		this.renderer.autoClear = false;                 // ← ДОБАВИТЬ
+        this.renderer.autoClear = false;
         document.body.appendChild(this.renderer.domElement);
     }
 
     _initScene() {
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.Fog(0x8fc9ff, 60, 280);
+
         this.camera = new THREE.PerspectiveCamera(
             75, window.innerWidth / window.innerHeight, 0.1, 500
         );
@@ -65,7 +66,7 @@ class Game {
             [ 3, 1.5, 0], [ 0, 0.5, 3]
         ];
         for (const [x, y, z] of positions) {
-            const m = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), mat.clone());
+            const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat.clone());
             m.position.set(x, y, z);
             this.world.add(m);
         }
@@ -79,6 +80,7 @@ class Game {
 
     _loop() {
         requestAnimationFrame(() => this._loop());
+
         const dt = Math.min(this.clock.getDelta(), 0.05);
 
         if (this.editor.active) {
@@ -100,19 +102,15 @@ class Game {
             this.fpsFrames = 0;
         }
 
-		 // === Рендер ===
-		// 1. Чистим всё
-		this.renderer.clear();
+        this.renderer.clear();
+        this.renderer.render(this.scene, this.camera);
 
-		// 2. Основная сцена
-		this.renderer.render(this.scene, this.camera);
-
-		// 3. Гизмо — поверх всего
-		if (this.editor.active) {
-			this.renderer.clearDepth();                 // стереть depth основного прохода
-			this.editor.gizmo.render(this.renderer);    // нарисовать гизмо без преград
-		}
+        if (this.editor.active) {
+            this.renderer.clearDepth();
+            this.editor.gizmo.render(this.renderer);
+        }
     }
 }
 
-window.game = new Game()
+window.game = new Game();
+window.THREE = THREE;

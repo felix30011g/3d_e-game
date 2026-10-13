@@ -35,6 +35,7 @@
             <div class="slot" data-type="torus">5<br>Тор</div>
             <div class="slot" data-type="plane">6<br>Плоскость</div>
         </div>
+		
 		<div id="snap-panel">
 			<label>
 				<input type="checkbox" id="snap-enabled">
@@ -45,6 +46,140 @@
 				<input type="number" id="snap-size" min="0.1" step="0.1" value="0.5">
 			</div>
 		</div>
+		
+		
+		<!-- Кнопка открытия панели графики -->
+		<button id="gfx-toggle" title="Настройки графики">⚙</button>
+
+		<!-- Панель настроек графики -->
+		<div id="gfx-panel">
+			<div class="gfx-header">
+				<span>Настройки графики</span>
+				<button id="gfx-close">×</button>
+			</div>
+
+			<div class="gfx-section">Ambient (общий свет)</div>
+			<div class="gfx-row">
+				<input type="color" id="light-ambient-color" value="#ffffff">
+				<input type="range" id="light-ambient-intensity" min="0" max="3" step="0.05" value="0.55">
+				<span id="light-ambient-intensity-val">0.55</span>
+			</div>
+
+			<div class="gfx-section">Солнце (DirectionalLight)</div>
+			<div class="gfx-row">
+				<input type="color" id="light-sun-color" value="#fff0d0">
+				<input type="range" id="light-sun-intensity" min="0" max="5" step="0.05" value="1.2">
+				<span id="light-sun-intensity-val">1.2</span>
+			</div>
+
+			<div class="gfx-section">Небо / Земля (Hemisphere)</div>
+			<div class="gfx-row">
+				<input type="color" id="light-hemi-sky" value="#8fc9ff">
+				<input type="color" id="light-hemi-ground" value="#3a2d1f">
+			</div>
+			<div class="gfx-row">
+				<input type="range" id="light-hemi-intensity" min="0" max="2" step="0.05" value="0.5">
+				<span id="light-hemi-intensity-val">0.5</span>
+			</div>
+			
+			<div class="gfx-section">Фон неба</div>
+			<div class="gfx-row">
+				<span>Верх:</span>
+				<input type="color" id="world-sky-top" value="#3a7bd5">
+				<span>Середина:</span>
+				<input type="color" id="world-sky-mid" value="#8fc9ff">
+			</div>
+			<div class="gfx-row">
+				<span>Низ:</span>
+				<input type="color" id="world-sky-bottom" value="#d8e9ff">
+			</div>
+
+			<div class="gfx-section">Пол (земля)</div>
+			<div class="gfx-row">
+				<span>Цвет:</span>
+				<input type="color" id="world-ground-color" value="#4a6a3a">
+			</div>
+			<div class="gfx-row">
+				<span>Шероховатость:</span>
+				<input type="range" id="world-ground-roughness" min="0" max="1" step="0.02" value="0.95">
+				<span id="world-ground-roughness-val">0.95</span>
+			</div>
+			<div class="gfx-row">
+				<span>Металличность:</span>
+				<input type="range" id="world-ground-metalness" min="0" max="1" step="0.02" value="0">
+				<span id="world-ground-metalness-val">0.00</span>
+			</div>
+
+			<div class="gfx-section">Тени</div>
+			<div class="gfx-row">
+				<label><input type="checkbox" id="gfx-shadows" checked> Включены</label>
+			</div>
+			<div class="gfx-row">
+				<span>Разрешение:</span>
+				<select id="gfx-shadow-res">
+					<option value="512">512</option>
+					<option value="1024">1024</option>
+					<option value="2048" selected>2048</option>
+					<option value="4096">4096</option>
+				</select>
+			</div>
+			<div class="gfx-row">
+				<span>Тип:</span>
+				<select id="gfx-shadow-type">
+					<option value="basic">Basic</option>
+					<option value="pcf">PCF</option>
+					<option value="pcfsoft" selected>PCF Soft</option>
+					<option value="vsm">VSM</option>
+				</select>
+			</div>
+
+			<div class="gfx-section">Туман</div>
+			<div class="gfx-row">
+				<label><input type="checkbox" id="gfx-fog-enabled" checked> Включён</label>
+				<input type="color" id="gfx-fog-color" value="#8fc9ff">
+			</div>
+			<div class="gfx-row">
+				<span>Near:</span>
+				<input type="number" id="gfx-fog-near" value="60" step="10" min="0">
+				<span>Far:</span>
+				<input type="number" id="gfx-fog-far" value="280" step="10" min="1">
+			</div>
+
+			<div class="gfx-section">Тонмаппинг</div>
+			<div class="gfx-row">
+				<select id="gfx-tonemapping" style="flex:1">
+					<option value="none">None</option>
+					<option value="linear">Linear</option>
+					<option value="reinhard">Reinhard</option>
+					<option value="cineon">Cineon</option>
+					<option value="aces" selected>ACES Filmic</option>
+				</select>
+			</div>
+			<div class="gfx-row">
+				<span>Экспозиция:</span>
+				<input type="range" id="gfx-exposure" min="0.1" max="3" step="0.05" value="1">
+				<span id="gfx-exposure-val">1</span>
+			</div>
+
+			<div class="gfx-section">Качество</div>
+			<div class="gfx-row">
+				<span>Pixel ratio:</span>
+				<select id="gfx-pixelratio" style="flex:1">
+					<option value="auto" selected>Auto (до 2x)</option>
+					<option value="0.5">0.5x</option>
+					<option value="0.75">0.75x</option>
+					<option value="1">1x</option>
+					<option value="1.5">1.5x</option>
+					<option value="2">2x</option>
+				</select>
+			</div>
+
+			<div class="gfx-buttons">
+				<button id="gfx-save-btn">💾 Сохранить как дефолт</button>
+				<button id="gfx-reset-btn">↺ Сброс</button>
+			</div>
+		</div>
+		
 
         <!-- Панель свойств (как в Unity Inspector) -->
         <div id="inspector">
@@ -84,6 +219,25 @@
                     <button id="insp-duplicate">Дублировать</button>
                     <button id="insp-delete" class="danger">Удалить</button>
                 </div>
+				
+				<!-- Панель свойств Освещения -->
+				<div class="insp-section" id="insp-light-section" style="display:none">Источник света</div>
+				<div class="insp-row" id="insp-light-color-row" style="display:none">
+					<input type="color" id="insp-light-color" style="width:100%;height:32px;border:none;background:none">
+				</div>
+				<div class="insp-row" id="insp-light-intensity-row" style="display:none">
+					<span>Интенсивность</span>
+					<input type="range" id="insp-light-intensity" min="0" max="10" step="0.1">
+					<span id="insp-light-intensity-val">1</span>
+				</div>
+				<div class="insp-row" id="insp-light-distance-row" style="display:none">
+					<span>Дистанция</span>
+					<input type="number" id="insp-light-distance" min="0" step="1">
+				</div>
+				<div class="insp-row" id="insp-light-shadow-row" style="display:none">
+					<label><input type="checkbox" id="insp-light-castshadow"> Отбрасывает тень</label>
+				</div>
+				
             </div>
         </div>
     </div>

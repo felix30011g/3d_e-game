@@ -6,28 +6,22 @@ export class Player {
         this.dom = domElement;
         this.world = world;
 
-        // Позиция игрока (не камеры — камера = позиция + высота глаз)
-        this.position = new THREE.Vector3(0, 2, 10);
+        this.position = new THREE.Vector3(0, 0, 10);
         this.velocity = new THREE.Vector3();
         this.eyeHeight = 1.7;
         this.radius = 0.35;
 
-        // Скорости
         this.walkSpeed = 6;
         this.runSpeed = 10;
         this.jumpSpeed = 7;
         this.gravity = 22;
 
-        // Мышь
         this.yaw = 0;
         this.pitch = 0;
         this.sensitivity = 0.0022;
         this.enabled = false;
 
         this.keys = {};
-
-        // Автоматически ставим игрока на землю
-        this.position.y = 0;
 
         this._bindInput();
         this._updateCamera();
@@ -44,15 +38,13 @@ export class Player {
         document.addEventListener('mousemove', e => {
             if (!this.enabled) return;
             this.yaw   -= e.movementX * this.sensitivity;
-            this.pitch += e.movementY * this.sensitivity;
+            this.pitch += e.movementY * this.sensitivity;   // инвертированная вертикаль
             this.pitch = Math.max(-Math.PI/2 + 0.01, Math.min(Math.PI/2 - 0.01, this.pitch));
         });
 
-        // Захват курсора по клику на canvas
         this.dom.addEventListener('click', () => {
-            // Не захватываем мышь, если активен редактор
-			if (this.editor && this.editor.active) return;
-			if (!this.enabled) this.lock();
+            if (this.editor && this.editor.active) return;
+            if (!this.enabled) this.lock();
         });
 
         document.addEventListener('pointerlockchange', () => {
@@ -67,7 +59,6 @@ export class Player {
         this.camera.position.copy(this.position);
         this.camera.position.y += this.eyeHeight;
 
-        // Направление взгляда
         const dir = new THREE.Vector3(
             Math.sin(this.yaw) * Math.cos(this.pitch),
             Math.sin(this.pitch),
@@ -77,10 +68,13 @@ export class Player {
     }
 
     update(dt) {
-		if (this.editor && this.editor.active) return;  // ← добавить
-		if (!this.enabled) { this._updateCamera(); return; }
+        if (this.editor && this.editor.active) return;
 
-        // Горизонтальное движение
+        if (!this.enabled) {
+            this._updateCamera();
+            return;
+        }
+
         const forward = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
         const right   = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
 
@@ -98,32 +92,27 @@ export class Player {
         this.velocity.x = move.x;
         this.velocity.z = move.z;
 
-        // Гравитация и прыжок
         const grounded = this.position.y <= 0.001;
         if (grounded && this.keys['Space']) {
             this.velocity.y = this.jumpSpeed;
         }
         this.velocity.y -= this.gravity * dt;
 
-        // Простейшая коллизия с полом
         this.position.addScaledVector(this.velocity, dt);
         if (this.position.y < 0) {
             this.position.y = 0;
             this.velocity.y = 0;
         }
 
-        // Простейшие коллизии с объектами редактора (AABB по горизонтали)
         this._resolveCollisions();
-
         this._updateCamera();
     }
 
     _resolveCollisions() {
         const objs = this.world.editableObjects;
         for (const obj of objs) {
-            if (!obj.geometry || obj.userData.isGround) continue;
+            if (!obj.geometry || obj.userData.isGround || obj.userData.isLightObject) continue;
 
-            // Грубая оценка сферы-обёртки
             const box = new THREE.Box3().setFromObject(obj);
             const playerMin = new THREE.Vector3(
                 this.position.x - this.radius, this.position.y, this.position.z - this.radius);
@@ -136,7 +125,6 @@ export class Player {
                 playerMax.y < box.min.y || playerMin.y > box.max.y
             ) continue;
 
-            // Пытаемся вытолкнуть по минимальной оси проникновения
             const dxMin = playerMax.x - box.min.x;
             const dxMax = box.max.x - playerMin.x;
             const dzMin = playerMax.z - box.min.z;

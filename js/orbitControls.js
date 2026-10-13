@@ -1,26 +1,20 @@
 import * as THREE from 'three';
 
-/**
- * Классическое управление камеры редактора:
- *  - ПКМ (drag)  → orbit вокруг target
- *  - СКМ (drag)  → pan
- *  - колесо      → zoom
- */
 export class EditorCamera {
     constructor(camera, domElement) {
         this.camera = camera;
-        this.dom = domElement;
-		if (!this.dom) {
-            throw new Error('EditorCamera: domElement не передан');
-        }
-        this.enabled = false;
+        this.dom = domElement || document.querySelector('canvas');
 
+        if (!this.dom) {
+            throw new Error('EditorCamera: domElement не передан и canvas не найден.');
+        }
+
+        this.enabled = false;
         this.target = new THREE.Vector3(0, 1, 0);
 
-        // Сферические координаты
         this.radius = 15;
-        this.theta = 0;                // горизонталь
-        this.phi = Math.PI / 3;        // вертикаль от +Y
+        this.theta = 0;
+        this.phi = Math.PI / 3;
 
         this.minRadius = 1;
         this.maxRadius = 200;
@@ -31,7 +25,7 @@ export class EditorCamera {
         this.panSpeed = 1;
         this.zoomSpeed = 1.1;
 
-        this._dragging = null;  // 'rotate' | 'pan' | null
+        this._dragging = null;
         this._lastX = 0;
         this._lastY = 0;
 
@@ -62,7 +56,6 @@ export class EditorCamera {
                 this.phi   -= dy * this.rotateSpeed;
                 this.phi = Math.max(this.minPhi, Math.min(this.maxPhi, this.phi));
             } else if (this._dragging === 'pan') {
-                // Смещение цели в плоскости камеры
                 const forward = new THREE.Vector3().subVectors(this.target, this.camera.position).normalize();
                 const right = new THREE.Vector3().crossVectors(forward, this.camera.up).normalize();
                 const up = new THREE.Vector3().crossVectors(right, forward).normalize();
@@ -85,7 +78,6 @@ export class EditorCamera {
             this.update();
         }, { passive: false });
 
-        // Отключаем contextmenu уже в editor.js, но на всякий случай
         this.dom.addEventListener('contextmenu', e => e.preventDefault());
     }
 
@@ -106,12 +98,5 @@ export class EditorCamera {
             this.target.z + z
         );
         this.camera.lookAt(this.target);
-    }
-
-    // Raycast из позиции мыши
-    raycastFromMouse(mouseNdc, objects) {
-        const ray = new THREE.Raycaster();
-        ray.setFromCamera(mouseNdc, this.camera);
-        return ray.intersectObjects(objects, false);
     }
 }
